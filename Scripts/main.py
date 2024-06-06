@@ -2,6 +2,7 @@ import random
 from tile import Tile
 from hand import Hand
 
+
 class Game:
     def __init__(self):
         self.suits = ['bam', 'cir', 'cha']  # bamboo, circle, character
@@ -34,27 +35,71 @@ class Game:
 
     def play_game(self):
         round_num = 1
-        while len(self.deck) > 0:
+        discard_num = 3
+        score = 0
+        while True:
+            not_played = True
             print(f"Round {round_num}")
             print("Player's hand: ")
-            print(self.player)
+            self.display_hand()
             print("Deck: ")
             print(len(self.deck), "tiles left")
-            print("Enter the tiles you want to discard (format: value suit, e.g., '1 bam, 2 cir'):")
-            tile_input = input().strip()
-            # Split input by comma, then strip each part and split by space
-            discard_tiles = [part.strip().split() for part in tile_input.split(",")]
-            for value, suit in discard_tiles:
-                try:
-                    tile_to_remove = Tile(suit, value)
-                    if tile_to_remove in self.player.tiles:
+            print(f"Round {round_num}")
+            while not_played:
+                if discard_num != 0:
+                    print("You have", discard_num, "discard(s) left.")
+                    action = input("Enter 'play' to play your hand or 'discard' to discard tiles: ").strip().lower()
+                else:
+                    action = 'play'
+                if action == 'play':
+                    score = 1
+                    if score == 1:
+                        print("Congratulations! You won this round!")
+                        score = 0
+                        not_played = False
+                        discard_num = 3
+                        break
+                    else:
+                        print("Sorry, you lost this round.")
+                        return
+                elif action == 'discard':
+                    print("Player's hand: ")
+                    self.display_hand()
+                    print("Deck: ")
+                    print(len(self.deck), "tiles left")
+                
+                    discard_indices = self.get_valid_discard_indices()
+                    
+                    discard_indices.sort(reverse=True)  # Sort in reverse order to avoid index shift issues
+                    for index in discard_indices:
+                        tile_to_remove = self.player.tiles[index - 1]  # Convert to zero-based index
                         self.remove_tile(tile_to_remove)
                         self.add_tile()
-                    else:
-                        print(f"Tile {value} {suit} not found in hand.")
-                except ValueError:
-                    print(f"Invalid tile format: {value} {suit}")
+                    discard_num -= 1
             round_num += 1
+
+    def display_hand(self):
+        for i, tile in enumerate(self.player.tiles, start=1):
+            print(f"{i}: {tile}")
+
+    def get_valid_discard_indices(self):
+        while True:
+            print("Enter the numbers of the tiles you want to discard (e.g., '1 2'):")
+            tile_input = input().strip()
+            try:
+                # Split input by comma and convert to integer
+                discard_indices = [int(index) for index in tile_input.split(" ")]
+                # Check for duplicates
+                if len(discard_indices) != len(set(discard_indices)):
+                    print("Duplicate indices detected. Please enter unique indices.")
+                    continue
+                # Check if indices are within valid range
+                if all(1 <= index <= len(self.player.tiles) for index in discard_indices):
+                    return discard_indices
+                else:
+                    print("Invalid indices detected. Please enter indices within the valid range.")
+            except ValueError:
+                print("Invalid input format. Please enter numbers separated by commas.")
 
 if __name__ == "__main__":
     game = Game()
