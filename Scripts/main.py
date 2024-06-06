@@ -25,8 +25,6 @@ class Game:
     def distribute_tiles(self):
         for _ in range(14):
             self.player.add_tile(self.deck.pop())
-        print("Player's hand: ")
-        print(self.player)
 
     def add_tile(self):
         self.player.add_tile(self.deck.pop())
