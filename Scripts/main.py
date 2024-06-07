@@ -1,6 +1,7 @@
 import random
 from tile import Tile
 from hand import Hand
+from scoring import Scoring
 
 class Game:
     def __init__(self):
@@ -39,7 +40,6 @@ class Game:
     def play_game(self):
         round_num = 1
         discard_num = 3
-        score = 0
         while True:
             not_played = True
             print(f"\n=== Round {round_num} ===")
@@ -47,31 +47,31 @@ class Game:
             while not_played:
                 if discard_num != 0:
                     self.display_hand()
-                    print(f"Discard chances: {discard_num}")
                     print(f"Deck: {len(self.deck)} tiles left")
+                    print(f"Discard chances: {discard_num}")
                     action = input("Enter 'play' to play your hand or 'discard' to discard tiles: ").strip().lower()
                 else:
                     action = 'play'
-                
+
                 if action == 'play':
-                    score = 1  # Simulate a winning condition
-                    if score == 1:
-                        print("\nCongratulations! You won this round!")
-                        score = 0
+                    scoring = Scoring(self.player)
+                    score = scoring.calculate_score()
+                    if score > 0:
+                        print(f"\nCongratulations! You scored {score} points this round!")
                         not_played = False
                         discard_num = 3
                         self.start_new_round()
                         round_num += 1
                         break
                     else:
-                        print("Sorry, you lost this round.")
+                        print("Sorry, you didn't score any points this round.")
                         return
                 elif action == 'discard':
                     self.display_hand()
                     print(f"Deck: {len(self.deck)} tiles left")
 
                     discard_indices = self.get_valid_discard_indices()
-                    
+
                     discard_indices.sort(reverse=True)  # Sort in reverse order to avoid index shift issues
                     for index in discard_indices:
                         tile_to_remove = self.player.tiles[index - 1]  # Convert to zero-based index
