@@ -2,14 +2,12 @@ import random
 from tile import Tile
 from hand import Hand
 
-
 class Game:
     def __init__(self):
         self.suits = ['bam', 'cir', 'cha']  # bamboo, circle, character
         self.specials = ['east', 'south', 'west', 'north', 'white', 'green', 'red']
-        self.deck = self.create_deck()
         self.player = Hand()
-        self.distribute_tiles()
+        self.start_new_round()
 
     def create_deck(self):
         deck = []
@@ -27,6 +25,11 @@ class Game:
         for _ in range(14):
             self.player.add_tile(self.deck.pop())
 
+    def start_new_round(self):
+        self.deck = self.create_deck()
+        self.player.clear_tiles()
+        self.distribute_tiles()
+
     def add_tile(self):
         self.player.add_tile(self.deck.pop())
 
@@ -39,35 +42,34 @@ class Game:
         score = 0
         while True:
             not_played = True
-            print(f"Round {round_num}")
-            print("Player's hand: ")
-            self.display_hand()
-            print("Deck: ")
-            print(len(self.deck), "tiles left")
-            print(f"Round {round_num}")
+            print(f"\n=== Round {round_num} ===")
+
             while not_played:
                 if discard_num != 0:
-                    print("You have", discard_num, "discard(s) left.")
+                    self.display_hand()
+                    print(f"Discard chances: {discard_num}")
+                    print(f"Deck: {len(self.deck)} tiles left")
                     action = input("Enter 'play' to play your hand or 'discard' to discard tiles: ").strip().lower()
                 else:
                     action = 'play'
+                
                 if action == 'play':
-                    score = 1
+                    score = 1  # Simulate a winning condition
                     if score == 1:
-                        print("Congratulations! You won this round!")
+                        print("\nCongratulations! You won this round!")
                         score = 0
                         not_played = False
                         discard_num = 3
+                        self.start_new_round()
+                        round_num += 1
                         break
                     else:
                         print("Sorry, you lost this round.")
                         return
                 elif action == 'discard':
-                    print("Player's hand: ")
                     self.display_hand()
-                    print("Deck: ")
-                    print(len(self.deck), "tiles left")
-                
+                    print(f"Deck: {len(self.deck)} tiles left")
+
                     discard_indices = self.get_valid_discard_indices()
                     
                     discard_indices.sort(reverse=True)  # Sort in reverse order to avoid index shift issues
@@ -76,30 +78,26 @@ class Game:
                         self.remove_tile(tile_to_remove)
                         self.add_tile()
                     discard_num -= 1
-            round_num += 1
 
     def display_hand(self):
+        print("\n--- Player's Hand ---")
         for i, tile in enumerate(self.player.tiles, start=1):
             print(f"{i}: {tile}")
 
     def get_valid_discard_indices(self):
         while True:
-            print("Enter the numbers of the tiles you want to discard (e.g., '1 2'):")
-            tile_input = input().strip()
+            tile_input = input("Enter the numbers of the tiles you want to discard (e.g., '1 2'): ").strip()
             try:
-                # Split input by comma and convert to integer
-                discard_indices = [int(index) for index in tile_input.split(" ")]
-                # Check for duplicates
+                discard_indices = [int(index) for index in tile_input.split()]
                 if len(discard_indices) != len(set(discard_indices)):
                     print("Duplicate indices detected. Please enter unique indices.")
                     continue
-                # Check if indices are within valid range
                 if all(1 <= index <= len(self.player.tiles) for index in discard_indices):
                     return discard_indices
                 else:
                     print("Invalid indices detected. Please enter indices within the valid range.")
             except ValueError:
-                print("Invalid input format. Please enter numbers separated by commas.")
+                print("Invalid input format. Please enter numbers separated by spaces.")
 
 if __name__ == "__main__":
     game = Game()

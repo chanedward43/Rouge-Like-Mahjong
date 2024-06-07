@@ -15,5 +15,8 @@ class Hand:
         special_order = {'east': 0, 'south': 1, 'west': 2, 'north': 3, 'white': 4, 'green': 5, 'red': 6}
         self.tiles.sort(key=lambda x: (order[x.suit], int(x.value) if x.value.isdigit() else special_order[x.value]))
 
+    def clear_tiles(self):
+        self.tiles.clear()
+
     def __repr__(self):
         return ' '.join(str(tile) for tile in self.tiles)
