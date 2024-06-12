@@ -14,6 +14,7 @@ class Scoring:
 
         total_value = 0
         total_multiplier = 0
+        highest_double = 0
 
         for triplet in self.triplets:
             if triplet[0].suit == 'special':
@@ -26,13 +27,28 @@ class Scoring:
             total_value += sum(int(tile.value) for tile in sequence if tile.value.isdigit())
             total_multiplier += 3
 
-        for double in self.doubles:
-            if double[0].suit == 'special':
+        if not self.doubles:
+            pass
+        else:
+            double_len = len(self.doubles) - 1
+            if self.doubles[double_len][0].suit == 'special':
                 total_value += 11 * 2
             else:
-                total_value += 2 * int(double[0].value)
+                total_value += 2 * int(self.doubles[double_len][0].value)
             total_multiplier += 2
 
+        for double in self.doubles:
+            if double[0].suit == 'special':
+                 highest_double = 11
+                 break
+            elif int(double[0].value) > highest_double:
+                highest_double = int(double[0].value)
+
+        if highest_double == 0:
+            pass
+        else:
+            total_value += highest_double * 2
+            total_multiplier += 2
 
         if total_multiplier == 0:
             return 0  # To avoid division by zero
