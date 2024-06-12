@@ -52,7 +52,7 @@ class Scoring:
 
         if total_multiplier == 0:
             return 0  # To avoid division by zero
-
+        print("\n=== Scoring ===")
         print(f"Triplets: {self.triplets}")
         print(f"Sequences: {self.sequences}")
         print(f"Doubles: {self.doubles}")

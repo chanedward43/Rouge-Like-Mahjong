@@ -40,31 +40,42 @@ class Game:
     def play_game(self):
         round_num = 1
         discard_num = 3
+        play_num = 3
+        score = 0
+        score_multiplier = 1000
         while True:
             not_played = True
-            print(f"\n=== Round {round_num} ===")
+            print(f"\n=== Round {round_num} | You need to score {round_num * score_multiplier} to Win ===")
 
             while not_played:
+                self.display_hand()
+                print(f"Deck: {len(self.deck)} tiles left")
+                print(f"Discard chances: {discard_num}")
+                print(f"Play chances: {play_num}")
                 if discard_num != 0:
-                    self.display_hand()
-                    print(f"Deck: {len(self.deck)} tiles left")
-                    print(f"Discard chances: {discard_num}")
                     action = input("Enter 'play' to play your hand or 'discard' to discard tiles: ").strip().lower()
                 else:
                     action = 'play'
 
                 if action == 'play':
                     scoring = Scoring(self.player)
-                    score = scoring.calculate_score()
-                    if score > 0:
+                    score += scoring.calculate_score()
+                    if score >= score_multiplier * round_num:
                         print(f"\nCongratulations! You scored {score} points this round!")
                         not_played = False
                         discard_num = 3
+                        play_num = 3
                         self.start_new_round()
                         round_num += 1
+                        score = 0
                         break
+                    elif play_num != 1:
+                        self.start_new_round()
+                        play_num -= 1
+                        print(f"\nYou scored {score} out of {round_num * score_multiplier} points. You have {play_num} more chances to play.")
+                        print(f"\n=== Round {round_num} | You need to score {round_num * score_multiplier - score} to Win ===")
                     else:
-                        print("Sorry, you didn't score any points this round.")
+                        print(f"You scored {score} out of {round_num * score_multiplier} points. You need {score_multiplier * round_num - score} more points to win.")
                         return
                 elif action == 'discard':
                     self.display_hand()
