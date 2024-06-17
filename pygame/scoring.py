@@ -2,7 +2,7 @@ from collections import Counter
 
 class Scoring:
     def __init__(self, hand):
-        self.hand = hand.tiles.copy()  # Use a copy to avoid modifying the original hand
+        self.hand = hand.tiles.copy()
         self.triplets = []
         self.sequences = []
         self.doubles = []
@@ -39,8 +39,8 @@ class Scoring:
 
         for double in self.doubles:
             if double[0].suit == 'special':
-                 highest_double = 11
-                 break
+                highest_double = 11
+                break
             elif int(double[0].value) > highest_double:
                 highest_double = int(double[0].value)
 
@@ -51,7 +51,7 @@ class Scoring:
             total_multiplier += 2
 
         if total_multiplier == 0:
-            return 0  # To avoid division by zero
+            return 0
         print("\n=== Scoring ===")
         print(f"Triplets: {self.triplets}")
         print(f"Sequences: {self.sequences}")

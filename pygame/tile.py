@@ -1,8 +1,9 @@
 import pygame
+
 class Tile:
     def __init__(self, suit, value):
         self.suit = suit
-        self.value = str(value)  # Ensure value is always a string
+        self.value = str(value)
         self.image = self.load_image()
 
     def load_image(self):
