@@ -69,11 +69,11 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:  # Press 'P' to play hand
+                if event.key == pygame.K_q:  # Press 'Q' to play hand
                     self.action = 'play'
-                elif event.key == pygame.K_d:  # Press 'D' to discard
+                elif event.key == pygame.K_w:  # Press 'W' to discard
                     self.action = 'discard'
-                elif event.key == pygame.K_RETURN and self.action == 'discard':
+                elif event.key == pygame.K_e and self.action == 'discard':  # Press 'E' to confirm discard
                     self.discard_tiles()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -110,6 +110,8 @@ class Game:
             f"Play Chances: {self.play_num}",
             f"Discard Chances: {self.discard_num}",
             f"Deck: {len(self.deck)} tiles left",
+            "Press 'Q' to play hand",
+            "Press 'W' to discard",
         ]
         for i, text in enumerate(info_text):
             text_surface = self.font.render(text, True, (0, 0, 0))
@@ -129,6 +131,8 @@ class Game:
         self.screen.blit(discard_text, (610, 160))
         
         if self.action == 'discard':
+            confirm_discard_text = self.font.render("Press 'E' to confirm discard", True, (0, 0, 0))
+            self.screen.blit(confirm_discard_text, (50, 410))
             discard_indices_text = self.font.render(f"Selected: {self.discard_indices}", True, (0, 0, 0))
             self.screen.blit(discard_indices_text, (50, 450))
 
