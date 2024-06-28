@@ -11,7 +11,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
+        self.width, self.height = 1200, 1000
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
         pygame.display.set_caption("Mahjong Game")
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 36)
@@ -69,13 +70,15 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:  # Press 'Q' to play hand
+                if event.key == pygame.K_q and self.action != 'discard':  # Press 'Q' to play hand
                     self.action = 'play'
                 elif event.key == pygame.K_w:  # Press 'W' to discard
                     self.action = 'discard'
                 elif event.key == pygame.K_e and self.action == 'discard':  # Press 'E' to confirm discard
                     self.discard_tiles()
-
+            elif event.type == pygame.VIDEORESIZE:
+                self.width, self.height = event.size
+                self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.action == 'discard':
                     self.handle_tile_selection(event.pos)
@@ -97,10 +100,25 @@ class Game:
         pygame.display.flip()
 
     def display_hand(self):
-        y = 500
-        x_offset = 50
+        y = self.height - int(self.height * 0.1)
+        x_offset = int(self.width * 0.08)
+        tile_width = int(self.width * 0.05)
+        tile_height = int(self.height * 0.15)
+        spacing = int(tile_width * 0.2)  # Add some spacing between tiles
+        selected_scale_factor = 1.15  # Scale factor for selected tiles
+
         for i, tile in enumerate(self.player.tiles):
-            self.screen.blit(tile.image, (x_offset + i * 50, y))
+            tile_rect = pygame.Rect(x_offset + i * (tile_width + spacing), y, tile_width, tile_height)
+            
+            if i in self.discard_indices:
+                # Selected tiles are scaled larger
+                larger_tile_image = pygame.transform.scale(tile.image, (int(tile_width * selected_scale_factor), int(tile_height * selected_scale_factor)))
+                self.screen.blit(larger_tile_image, (tile_rect.x, tile_rect.y - tile_height // 2))
+            else:
+                # Regular tiles are displayed at normal size
+                scaled_tile_image = pygame.transform.scale(tile.image, (tile_width, tile_height))
+                self.screen.blit(scaled_tile_image, (tile_rect.x, tile_rect.y))
+
 
     def display_game_info(self):
         info_text = [
@@ -115,11 +133,11 @@ class Game:
         ]
         for i, text in enumerate(info_text):
             text_surface = self.font.render(text, True, (0, 0, 0))
-            self.screen.blit(text_surface, (50, 50 + i * 40))
+            self.screen.blit(text_surface, (int(self.width * 0.05), int(self.height * 0.05) + i * int(self.height * 0.05)))
 
     def display_buttons(self):
-        play_button = pygame.Rect(600, 50, 150, 50)
-        discard_button = pygame.Rect(600, 150, 150, 50)
+        play_button = pygame.Rect(self.width - int(self.width * 0.25), int(self.height * 0.05), int(self.width * 0.18), int(self.height * 0.08))
+        discard_button = pygame.Rect(self.width - int(self.width * 0.25), int(self.height * 0.15), int(self.width * 0.18), int(self.height * 0.08))
         
         pygame.draw.rect(self.screen, (0, 128, 0), play_button)
         pygame.draw.rect(self.screen, (128, 0, 0), discard_button)
@@ -127,14 +145,14 @@ class Game:
         play_text = self.font.render("Play", True, (255, 255, 255))
         discard_text = self.font.render("Discard", True, (255, 255, 255))
         
-        self.screen.blit(play_text, (625, 60))
-        self.screen.blit(discard_text, (610, 160))
+        self.screen.blit(play_text, (play_button.x + play_button.width // 4, play_button.y + play_button.height // 4))
+        self.screen.blit(discard_text, (discard_button.x + discard_button.width // 8, discard_button.y + discard_button.height // 4))
         
         if self.action == 'discard':
-            confirm_discard_text = self.font.render("Press 'E' to confirm discard", True, (0, 0, 0))
-            self.screen.blit(confirm_discard_text, (50, 410))
             discard_indices_text = self.font.render(f"Selected: {self.discard_indices}", True, (0, 0, 0))
-            self.screen.blit(discard_indices_text, (50, 450))
+            self.screen.blit(discard_indices_text, (int(self.width * 0.05), self.height - int(self.height * 0.27)))
+            confirm_discard_text = self.font.render("Press 'E' to confirm discard", True, (0, 0, 0))
+            self.screen.blit(confirm_discard_text, (int(self.width * 0.05), self.height - int(self.height * 0.31)))
 
     def handle_play(self):
         scoring = Scoring(self.player)
@@ -159,8 +177,8 @@ class Game:
         self.start_new_round()
 
     def handle_button_click(self, mouse_pos):
-        play_button = pygame.Rect(600, 50, 150, 50)
-        discard_button = pygame.Rect(600, 150, 150, 50)
+        play_button = pygame.Rect(self.width - int(self.width * 0.25), int(self.height * 0.05), int(self.width * 0.18), int(self.height * 0.08))
+        discard_button = pygame.Rect(self.width - int(self.width * 0.25), int(self.height * 0.15), int(self.width * 0.18), int(self.height * 0.08))
         
         if play_button.collidepoint(mouse_pos):
             self.action = 'play'
@@ -168,10 +186,14 @@ class Game:
             self.action = 'discard'
 
     def handle_tile_selection(self, mouse_pos):
-        y = 500
-        x_offset = 50
+        y = self.height - int(self.height * 0.1)
+        x_offset = int(self.width * 0.08)
+        tile_width = int(self.width * 0.05)
+        tile_height = int(self.height * 0.15)
+        spacing = int(tile_width * 0.2)  # Ensure this matches the spacing in display_hand
+
         for i, tile in enumerate(self.player.tiles):
-            tile_rect = pygame.Rect(x_offset + i * 50, y, tile.image.get_width(), tile.image.get_height())
+            tile_rect = pygame.Rect(x_offset + i * (tile_width + spacing), y, tile_width, tile_height)
             if tile_rect.collidepoint(mouse_pos):
                 if i in self.discard_indices:
                     self.discard_indices.remove(i)
